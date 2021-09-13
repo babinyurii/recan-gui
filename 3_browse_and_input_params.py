@@ -8,6 +8,7 @@ sg.theme('DarkAmber')
 layout = [  [sg.Text("Choose your alignment: ")], 
              [sg.FileBrowse()],
              [sg.Text("window"), sg.Input()],
+             [sg.Text("step"), sg.Input()],
              
              [sg.Button("create plot")],
              [sg.Output(size=(100,50), key='-OUTPUT-')],
@@ -37,7 +38,7 @@ while True:
         sim_obj = Simgen(values["Browse"])
         print(sim_obj)
         
-        print(sim_obj.get_info())
+        #print(sim_obj.get_info())
         
         
     

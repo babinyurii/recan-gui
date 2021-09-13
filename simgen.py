@@ -202,7 +202,7 @@ class Simgen(MultipleSeqAlignment):
         return collect_sliced, left_border, right_border
             
             
-    def simgen(self, pot_rec, window=500, shift=250, region=False, dist='pdist'):
+    def simgen(self, pot_rec, window=500, shift=250, region=False, dist='pdist', inter=True):
         """slices the alignment, collects the distance data, outputs the plot
 
         Parameters:
@@ -240,14 +240,14 @@ class Simgen(MultipleSeqAlignment):
         #self._move_window(window, pot_rec, shift, dist)
         self._distance = self._move_window(window, pot_rec, shift, dist)
         
-        self._draw_simplot()
+        #self._draw_simplot()
         #TODO
         # inter=True, when tick merge will be solved
         # add this parameter to choose between plotly and mpl
-        #if inter:
-        #    self._draw_simplot()
-        #else:
-        #    self._draw_simplot_mpl()
+        if inter:
+            self._draw_simplot()
+        else:
+            self._draw_simplot_mpl()
             
 
     def get_data(self, df=True):
