@@ -2,13 +2,15 @@
 and to explore recombination events using similarity plots
 """
 
+
 from Bio.Align import MultipleSeqAlignment
 from Bio.SeqRecord import SeqRecord
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import pandas as pd
-from plotly.offline import init_notebook_mode, iplot
-import plotly.graph_objs as go
+#from plotly.offline import init_notebook_mode, iplot
+#import plotly.graph_objs as go
 
+import numpy as np
 
 
 class Simgen(MultipleSeqAlignment):
@@ -74,11 +76,16 @@ class Simgen(MultipleSeqAlignment):
         ticks = self._ticks[1:]
         #labels = list(self._distance.keys())
         #print(data, ticks, labels, sep="\n")
-        plt.figure(figsize=(15, 8))
+        #plt.figure(figsize=(15, 8))
         for i in data:
             plt.plot(range(1, len(i) + 1), i)
-        plt.xticks(list(range(1, len(ticks))), ticks, rotation='vertical')
-        plt.show()
+        #########################################33
+        # here are some errors
+        # 1. tick labels number doesn't match ticks
+        # 2. tick labels overlap and look ugly
+        #plt.xticks(list(range(1, len(ticks)+1)), ticks, rotation='vertical')
+        
+        #plt.show()
     
     
     def _get_x_labels(self, left_border, right_border, shift):
@@ -202,7 +209,7 @@ class Simgen(MultipleSeqAlignment):
         return collect_sliced, left_border, right_border
             
             
-    def simgen(self, pot_rec, window=500, shift=250, region=False, dist='pdist', inter=True):
+    def simgen(self, pot_rec, window=100, shift=25, region=False, dist='pdist'):
         """slices the alignment, collects the distance data, outputs the plot
 
         Parameters:
@@ -222,9 +229,7 @@ class Simgen(MultipleSeqAlignment):
         dist: str
             'pdist' or 'k2p' 
             pairwise or Kimura methods to calculate distance
-       
             """
-
         assert window >=1, "window  parameter can't be a negative or zero"
         assert shift >= 1, "shift parameter can't be a negative or zero" 
 
@@ -244,10 +249,8 @@ class Simgen(MultipleSeqAlignment):
         #TODO
         # inter=True, when tick merge will be solved
         # add this parameter to choose between plotly and mpl
-        if inter:
-            self._draw_simplot()
-        else:
-            self._draw_simplot_mpl()
+        
+        self._draw_simplot_mpl()
             
 
     def get_data(self, df=True):
@@ -307,4 +310,4 @@ class Simgen(MultipleSeqAlignment):
                 df.to_excel(writer)
             else:
                 print("invalid output file format")
-        
+
