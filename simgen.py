@@ -186,22 +186,27 @@ class Simgen(MultipleSeqAlignment):
             #print(e, ": perhaps your alignment contains only gaps")
             pass
         
-    def _get_collect_sliced_left_right_borders(self, region=False):
+    def _get_collect_sliced_left_right_borders(self, seq_to_draw, region=False):
         
         if region:
             assert region[0] < region[1], "the value of the first nucleotide position should be less than the second one"
             collect_sliced = []
             for rec in self._records:  # access to seq of the SeqRecord obj inside MultipleSeqAlignment
-                sliced_seq = rec.seq[region[0]:region[1]]
-                collect_sliced.append(SeqRecord(sliced_seq, id=rec.id, name=rec.name, description=rec.description))
+               
+                if rec.id in seq_to_draw:
+                    sliced_seq = rec.seq[region[0]:region[1]]
+                    collect_sliced.append(SeqRecord(sliced_seq, id=rec.id, name=rec.name, description=rec.description))
             left_border = region[0]   # border for the first tick
             right_border = region[1]  # if region, 'right_border' is actual position
 
         else:
             collect_sliced = []
+            print(seq_to_draw)
+            print(self._records)
             for rec in self._records:  # access to seq of the SeqRecord obj inside MultipleSeqAlignment
-                sliced_seq = rec.seq[:]
-                collect_sliced.append(SeqRecord(sliced_seq, id=rec.id, name=rec.name, description=rec.description))
+                if rec.id in seq_to_draw:
+                    sliced_seq = rec.seq[:]
+                    collect_sliced.append(SeqRecord(sliced_seq, id=rec.id, name=rec.name, description=rec.description))
             
             left_border = 1  # border for the first tick
             right_border = self.get_alignment_length()
@@ -209,7 +214,7 @@ class Simgen(MultipleSeqAlignment):
         return collect_sliced, left_border, right_border
             
             
-    def simgen(self, pot_rec, window=100, shift=25, region=False, dist='pdist'):
+    def simgen(self, pot_rec, seq_to_draw, window=100, shift=25, region=False, dist='pdist'):
         """slices the alignment, collects the distance data, outputs the plot
 
         Parameters:
@@ -233,7 +238,8 @@ class Simgen(MultipleSeqAlignment):
         assert window >=1, "window  parameter can't be a negative or zero"
         assert shift >= 1, "shift parameter can't be a negative or zero" 
 
-        collect_sliced, left_border, right_border = self._get_collect_sliced_left_right_borders(region)
+        collect_sliced, left_border, right_border = self._get_collect_sliced_left_right_borders(region, 
+                                                                                                seq_to_draw)
         self._align = MultipleSeqAlignment(collect_sliced)
         # creating tick labels for the plot
         
