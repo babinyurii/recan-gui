@@ -188,6 +188,7 @@ class Simgen(MultipleSeqAlignment):
         
     def _get_collect_sliced_left_right_borders(self, seq_to_draw, region=False):
         
+        print("retion in method _get : ", region)
         if region:
             assert region[0] < region[1], "the value of the first nucleotide position should be less than the second one"
             collect_sliced = []
@@ -237,9 +238,10 @@ class Simgen(MultipleSeqAlignment):
             """
         assert window >=1, "window  parameter can't be a negative or zero"
         assert shift >= 1, "shift parameter can't be a negative or zero" 
-
-        collect_sliced, left_border, right_border = self._get_collect_sliced_left_right_borders(region, 
-                                                                                                seq_to_draw)
+        
+        print("region: ", region)
+        collect_sliced, left_border, right_border = self._get_collect_sliced_left_right_borders(region=region, seq_to_draw=seq_to_draw
+                                                                                                )
         self._align = MultipleSeqAlignment(collect_sliced)
         # creating tick labels for the plot
         

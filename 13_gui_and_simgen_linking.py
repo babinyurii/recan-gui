@@ -58,21 +58,18 @@ layout = [
 
 
 window = sg.Window('13', layout, resizable=True)
-
 #output to multiline
-print = lambda *args, **kwargs: window['-ML-'+ sg.WRITE_ONLY_KEY].print(*args, **kwargs)
+#print = lambda *args, **kwargs: window['-ML-'+ sg.WRITE_ONLY_KEY].print(*args, **kwargs)
 
 
-seq_names = []
 sequences_added = False # if data are retrieved from file path
-#potential_recombinant = None 
-#sequenced_to_draw = []
-#checkboxes_and_radiobuttons = []
-
-
-
+seq_names = [] # to store ids of sequences to show them in the gui
+sequences_to_draw = [] # sequences to plot
+checkboxes_and_radiobuttons = [] # stores checkboxes and radiobuttons keys
+pot_rec_index = None
 
 def get_checkboxes_and_radiobuttons(values):
+    
     for key in values.keys():
         if type(key) == str:
             if key.endswith("checkbox") or key.endswith("radio"):
@@ -102,13 +99,15 @@ while True:
         
 #try: 
     event, values = window.read()
+    sim_obj = Simgen(values["Browse"])
     print(event, values)
+    print("sim_obj:", sim_obj)
     if event in (sg.WIN_CLOSED, 'Exit'):  # always,  always give a way out!
         break
     
     elif event == "-get_seq_names-":
         # create sim obj which inherets from multiple alignment from biopython
-        sim_obj = Simgen(values["Browse"])
+        
         
         # #############################
         # RETRIEVE THE DATA FROM ALIGNMENT
@@ -133,23 +132,32 @@ while True:
         print(event, values)
         print("sequences added: ", sequences_added)
         
+        
+        
     elif event == '-plot-':
         #potential_recombinant = None
-        sequences_to_draw = []
-        checkboxes_and_radiobuttons = []
+        checkboxes_and_radiobuttons = [] # stores checkboxes and radiobuttons keys
+        sequences_to_draw = [] # sequences to plot
+
         
         checkboxes_and_radiobuttons = get_checkboxes_and_radiobuttons(values)
+        print("checkboxes and radiobuttons:")
         for i in checkboxes_and_radiobuttons:
             print(i)
-        
-        pot_rec_index = get_pot_rec_id(checkboxes_and_radiobuttons, values)
-        print("potential recombinant: ", pot_rec_index)
-        
+        print("-" * 20)
+            
         sequences_to_draw = get_seq_ids_to_draw(checkboxes_and_radiobuttons, values, 
                                                 sequences_to_draw)
         print("sequences to draw: ")
         for i in sequences_to_draw:
             print(i)
+        print("-" * 20)
+        
+        pot_rec_index = get_pot_rec_id(checkboxes_and_radiobuttons, values)
+        print("potential recombinant: \n", pot_rec_index)
+        print("-" * 20)
+        
+        
        
         #########################################################
         # ------------------------------- PASTE YOUR MATPLOTLIB CODE HERE
@@ -170,7 +178,9 @@ while True:
         sim_obj.simgen(pot_rec=pot_rec_index, 
                        seq_to_draw=sequences_to_draw,
                        window=sliding_window_size, 
-                       shift=window_shift)
+                       shift=window_shift,
+                       region=False,
+                       dist="pdist")
     
         plt.title("")
         plt.xlabel('alignment position')
