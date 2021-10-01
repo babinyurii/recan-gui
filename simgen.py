@@ -74,11 +74,18 @@ class Simgen(MultipleSeqAlignment):
         
         data = list(self._distance.values())
         ticks = self._ticks[1:]
+        
+        for_legend = []
+        for key in self._distance.keys():
+            for_legend.append(key)
+            
         #labels = list(self._distance.keys())
         #print(data, ticks, labels, sep="\n")
         #plt.figure(figsize=(15, 8))
         for i in data:
             plt.plot(range(1, len(i) + 1), i)
+            
+        plt.legend(for_legend)
         #########################################33
         # here are some errors
         # 1. tick labels number doesn't match ticks
@@ -101,32 +108,38 @@ class Simgen(MultipleSeqAlignment):
         #self._ticks = tick_container
         return tick_container
     
-    def _move_window(self, window, pot_rec, shift, dist):
+    def _move_window(self, window, pot_rec, pot_rec_id, seq_to_draw, shift, dist):
         """moves window"""
         distance_data = {}
         parents = list(range(0, len(self._align)))
-        parents.remove(pot_rec)
+        #parents.remove(pot_rec)
         align_length = len(self._align[0, :])        
         
         for par in parents:
             dist_container = []
             start = 0
             finish = shift
-
-            while start < align_length:
-                seq1 = self._align[pot_rec, start:finish].seq # here is a potential recombinant sequence slice
-                seq2 = self._align[par, start:finish].seq  # here's a parent's slice
+            
+            if self._align[par].id == pot_rec_id:
+                continue
+            if self._align[par].id in seq_to_draw:
                 
-                if dist == "pdist":
-                    distance = self._pdistance(seq1, seq2)
-                    dist_container.append(distance) #calculate pdistance, append to container
-                elif dist == "k2p":
-                    distance = self._K2Pdistance(seq1, seq2)
-                    dist_container.append(distance)
-                    #dist_container.append(self._K2Pdistance(seq1, seq2)) #calculate pdistance, append to container
-                start += shift
-                finish = start + window
-            distance_data[self._align[par].id] = dist_container
+                
+                while start < align_length:
+                    seq1 = self._align[pot_rec, start:finish].seq # here is a potential recombinant sequence slice
+                    seq2 = self._align[par, start:finish].seq  # here's a parent's slice
+                    
+                    if dist == "pdist":
+                        distance = self._pdistance(seq1, seq2)
+                        dist_container.append(distance) #calculate pdistance, append to container
+                    elif dist == "k2p":
+                        distance = self._K2Pdistance(seq1, seq2)
+                        dist_container.append(distance)
+                        #dist_container.append(self._K2Pdistance(seq1, seq2)) #calculate pdistance, append to container
+                    start += shift
+                    finish = start + window
+                print("plotted : ", self._align[par].id)
+                distance_data[self._align[par].id] = dist_container
     
         #self._distance = distance_data  
         return distance_data
@@ -194,9 +207,9 @@ class Simgen(MultipleSeqAlignment):
             collect_sliced = []
             for rec in self._records:  # access to seq of the SeqRecord obj inside MultipleSeqAlignment
                
-                if rec.id in seq_to_draw:
-                    sliced_seq = rec.seq[region[0]:region[1]]
-                    collect_sliced.append(SeqRecord(sliced_seq, id=rec.id, name=rec.name, description=rec.description))
+            #if rec.id in seq_to_draw:
+                sliced_seq = rec.seq[region[0]:region[1]]
+                collect_sliced.append(SeqRecord(sliced_seq, id=rec.id, name=rec.name, description=rec.description))
             left_border = region[0]   # border for the first tick
             right_border = region[1]  # if region, 'right_border' is actual position
 
@@ -205,9 +218,9 @@ class Simgen(MultipleSeqAlignment):
             print(seq_to_draw)
             print(self._records)
             for rec in self._records:  # access to seq of the SeqRecord obj inside MultipleSeqAlignment
-                if rec.id in seq_to_draw:
-                    sliced_seq = rec.seq[:]
-                    collect_sliced.append(SeqRecord(sliced_seq, id=rec.id, name=rec.name, description=rec.description))
+            #if rec.id in seq_to_draw:
+                sliced_seq = rec.seq[:]
+                collect_sliced.append(SeqRecord(sliced_seq, id=rec.id, name=rec.name, description=rec.description))
             
             left_border = 1  # border for the first tick
             right_border = self.get_alignment_length()
@@ -215,7 +228,7 @@ class Simgen(MultipleSeqAlignment):
         return collect_sliced, left_border, right_border
             
             
-    def simgen(self, pot_rec, seq_to_draw, window=100, shift=25, region=False, dist='pdist'):
+    def simgen(self, pot_rec, seq_to_draw, pot_rec_id, window=100, shift=25, region=False, dist='pdist'):
         """slices the alignment, collects the distance data, outputs the plot
 
         Parameters:
@@ -251,7 +264,12 @@ class Simgen(MultipleSeqAlignment):
         # calculating pairwise distance
         
         #self._move_window(window, pot_rec, shift, dist)
-        self._distance = self._move_window(window, pot_rec, shift, dist)
+        self._distance = self._move_window(window=window, 
+                                           pot_rec=pot_rec, 
+                                           pot_rec_id=pot_rec_id, 
+                                           seq_to_draw=seq_to_draw,
+                                           shift=shift, 
+                                           dist=dist)
         
         #self._draw_simplot()
         #TODO

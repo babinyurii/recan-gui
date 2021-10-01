@@ -82,16 +82,29 @@ def get_pot_rec_id(checkboxes_and_radiobuttons, values):
     for seq_id in checkboxes_and_radiobuttons:
         if seq_id.endswith("radio"):
             if values[seq_id]:
-                potential_recombinant = seq_id.rsplit("_", maxsplit=1)[0]
-    return potential_recombinant
+                pot_rec_index = int(seq_id.rsplit("_", maxsplit=2)[1])
+                pot_rec_id = seq_id.rsplit("_", maxsplit=2)[0]
+                
+                break
+    return pot_rec_index, pot_rec_id
 
 
 
 def get_seq_ids_to_draw(checkboxes_and_radiobuttons, values, sequences_to_draw):
+    
+    #for seq_id in checkboxes_and_radiobuttons:
+    #    if seq_id.endswith("radio"):
+    #        if values[seq_id]:
+    #            sequences_to_draw.append(seq_id.rsplit("_", maxsplit=2)[0])
+    #            break
+
+    # 
     for seq_id in checkboxes_and_radiobuttons:
         if seq_id.endswith("checkbox"):
             if values[seq_id]:
-                sequences_to_draw.append(seq_id.rsplit("_", maxsplit=1)[0])
+                sequences_to_draw.append(seq_id.rsplit("_", maxsplit=2)[0])
+       
+            
     return sequences_to_draw
 
 
@@ -114,7 +127,7 @@ while True:
         # get alignment length
         counter = 0
         for record in sim_obj:
-            seq_names.append(record.id)
+            seq_names.append(record.id + "_" + str(counter))
             counter += 1
         print("total number of seq in alignment: ", counter)
         print("alignment length: ", sim_obj.get_alignment_length())
@@ -153,8 +166,8 @@ while True:
             print(i)
         print("-" * 20)
         
-        pot_rec_index = get_pot_rec_id(checkboxes_and_radiobuttons, values)
-        print("potential recombinant: \n", pot_rec_index)
+        pot_rec_index, pot_rec_id = get_pot_rec_id(checkboxes_and_radiobuttons, values)
+        print("potential recombinant: {0}, {1}\n".format( pot_rec_index, pot_rec_id))
         print("-" * 20)
         
         
@@ -172,11 +185,12 @@ while True:
         #sim_obj = Simgen(values["Browse"])
         sliding_window_size = int(values[0])
         window_shift = int(values[1])
-        pot_rec_index = int(values[2])
+        #pot_rec_index = int(values[2])
         
         
         sim_obj.simgen(pot_rec=pot_rec_index, 
                        seq_to_draw=sequences_to_draw,
+                       pot_rec_id=pot_rec_id,
                        window=sliding_window_size, 
                        shift=window_shift,
                        region=False,
